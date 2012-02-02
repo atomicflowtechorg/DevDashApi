@@ -79,20 +79,27 @@ class TaskModel extends CI_Model {
         $this->fldNotes = $task->notes;
         $this->fldDateDue = $task->dateDue;
         $this->fldDateCompleted;
+        
+        $queryExists = $this->db->query("SELECT pkTaskId FROM tblTask WHERE pkTaskId = '$this->pkTaskId'");
+        //if taskId doesnt exist
+        if($this->db->affected_rows() === 0){
+            return 404;
+        }
         //code that checks if updating for an unassigned task
         $query = $this->db->query("SELECT COUNT(*) AS total FROM tblTaskerTask WHERE fkTaskId = '$this->pkTaskId'");
         foreach ($query->result() as $row) {
             $hasTasker = $row->total;
         }
-
+        
+        
+        /**********************************tblTaskerTask modification *********************************/
         switch ($hasTasker) {
 
             default :
-                echo $this->fldAssignedTo;
-                echo "FAILURE!!!!";
+                return 400;
                 break;
             case 0 :
-                if ($this->fldAssignedTo == '') {
+                if ($this->fldAssignedTo == '') {//task stays unassigned
                     
                 } else {
                     $this->db->query("INSERT INTO tblTaskerTask (fkUsername, fkTaskId ) VALUES ('$this->fldAssignedTo', '$this->pkTaskId')");
@@ -100,9 +107,9 @@ class TaskModel extends CI_Model {
                 }
                 break;
             case 1 :
-                if ($this->fldAssignedTo != '') {
+                if ($this->fldAssignedTo != '') {//task changes assigned
                     $this->db->query("UPDATE tblTaskerTask SET fkUsername='$this->fldAssignedTo' WHERE fkTaskId = '$this->pkTaskId'");
-                } else {
+                } else { //task becomes unassigned
                     $this->db->query("DELETE FROM tblTaskerTask WHERE fkTaskId = '$this->pkTaskId'");
                     $this->fldStatus = 'Available';
                 }
@@ -110,29 +117,41 @@ class TaskModel extends CI_Model {
         }
 
 
-        if ($this->fldStatus == 'Completed') {
+        if ($this->fldStatus == 'Completed') {//update task to completed
             $this->fldDateCompleted = date('Y-m-d H:i:s', time());
         }
         //updates task
+        if($this->fldName==''){
+            return 406;
+        }
         $tblTask = array('fldName' => $this->fldName, 'fldStatus' => $this->fldStatus, 'fldNotes' => $this->fldNotes, 'fldDateDue' => $this->fldDateDue, 'fldDateCompleted' => $this->fldDateCompleted);
 
         $where = "pkTaskId = $this->pkTaskId";
         $update[] = $this->db->update_string('tblTask', $tblTask, $where);
         $this->db->query($update[0]);
         //doesnt actually use the returned value...
-        return $this;
+        return 200;
     }
 
     function tasks_get() {
         $this->load->library('Task');
         $tasks = array();
-        $query = $this->db->query("SELECT * FROM tblTask WHERE fldStatus NOT LIKE 'Deleted'");
+        $taskQuery = "LEFT JOIN tblTaskerTask b ON a.pkTaskId = b.fkTaskId";
+        $listQuery = "LEFT JOIN tblListTask e ON a.pkTaskId = e.fkTaskId LEFT JOIN tblList d ON e.fkListId = d.pkListId";
+        
+        $queryString = "SELECT DISTINCT a.pkTaskId, a.fldName, a.fldStatus, a.fldNotes, a.fldDateDue, a.fldDateCompleted, b.fkUsername ,d.fldListName, d.pkListId
+                        FROM tblTask a
+			$taskQuery
+                        $listQuery
+			WHERE a.fldStatus NOT LIKE 'Deleted'";
+        $query = $this->db->query($queryString);
         foreach ($query->result() as $item) {
             $task = new Task();
             $task->id = $item->pkTaskId;
             $task->name = $item->fldName;
             $task->status = $item->fldStatus;
-            $task->assignedTo = $item->fldAssignedTo;
+            $task->assignedTo = $item->fkUsername;
+            $task->listId = $item->pkListId;
             $task->notes = $item->fldNotes;
             $task->dateDue = $item->fldDateDue;
             $task->dateCompleted = $item->fldDateCompleted;
@@ -154,7 +173,7 @@ class TaskModel extends CI_Model {
                         FROM tblTask a
 			$taskQuery
                         $listQuery
-			WHERE b.fkUsername = '$username' AND a.fldStatus NOT LIKE 'Deleted' AND a.fldStatus NOT LIKE 'Completed'";
+			WHERE b.fkUsername = '$username' AND a.fldStatus NOT LIKE 'Deleted'";
         $query = $this->db->query($queryString);
 
 

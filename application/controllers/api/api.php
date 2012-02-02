@@ -65,21 +65,37 @@ class Api extends REST_Controller {
         $this->load->library('Task');
         $task = new Task();
 
-        $task->id = $this->post('taskId');
+        $task->id = $this->post('id');
         $task->name = $this->post('name');
-        $task->assignedTo = $this->post('username');
-        $task->status = $this->post('status');
-        $task->notes = $this->post('notes');
-        $task->dateDue = $this->post('dateDue');
-
-        if (!$this->post('taskId')) {
-            $this->response(array('error' => 'Apparently you didnt put shit in the taskID, justsayin'), 400);
+        
+        
+        if($this->post('status') !== false){
+            $task->status = $this->post('status');
+        }
+        
+        if($this->post('assignedTo') !== false){
+            $task->assignedTo = $this->post('assignedTo');
+        }
+        
+        if($this->post('notes') !== false){
+            $task->notes = $this->post('notes');
+        }
+        
+        if($this->post('dateDue') !== false){
+            $task->dateDue = $this->post('dateDue');
+        }
+        
+        if (!$this->post('id')) {
+            $this->response(array('error' => 'id is required for an update'), 400);
         }
 
-        $updateTask = $this->TaskModel->task_update($task);
-        if ($updateTask) {
-            $this->response($updateTask, 200); // 200 being the HTTP response code
-        } else {
+        $statusCode = $this->TaskModel->task_update($task);
+        if ($statusCode === 200) {
+            $this->response($task, 200); // 200 being the HTTP response code
+        }else if($statusCode === 406){
+            $this->response(array('error' => 'Missing mandatory field (name)'), 406);
+        }
+        else {
             $this->response(array('error' => 'Task could not be found'), 404);
         }
     }
@@ -88,10 +104,22 @@ class Api extends REST_Controller {
         $this->load->model('TaskModel');
         $this->load->library('Task');
         $task = new Task();
-        $task->name = $this->put('name');
-        $task->assignedTo = $this->put('assignedTo');
-        $task->notes = $this->put('notes');
-        $task->dateDue = $this->put('dateDue');
+        if (!$this->put('name')){
+            $this->response(array('error'=> 'Task Requires a name'), 406);
+        } else {
+            $task->name = $this->put('name');
+        }
+        if($this->put('assignedTo') !== false){
+            $task->assignedTo = $this->put('assignedTo');
+        }
+        if($this->put('notes') !== false){
+            $task->notes = $this->put('notes');
+        }
+        
+        if($this->put('dateDue') !== false){
+            $task->dateDue = $this->put('dateDue');
+        }
+        
         $taskResponse = $this->TaskModel->task_put($task);
         $this->response($taskResponse, 200);
     }
