@@ -52,8 +52,8 @@ code {
 <ul>
 	<li><a href="<?php echo site_url('api/users');?>">Users</a> - defaulting to XML</li>
 	<li><a href="<?php echo site_url('api/users/format/csv');?>">Users</a> - get it in CSV</li>
-	<li><a href="<?php echo site_url('api/user/id/1');?>">User #1</a> - defaulting to XML</li>
-	<li><a href="<?php echo site_url('api/user/id/1/format/json');?>">User #1</a> - get it in JSON</li>
+	<li><a href="<?php echo site_url('api/user/username/lucasmp');?>">User lucasmp</a> - defaulting to JSON</li>
+	<li><a href="<?php echo site_url('api/user/username/lucasmp/format/xml');?>">User lucasmp</a> - get it in XML</li>
 	<li><a id="ajax" href="<?php echo site_url('api/users/format/json');?>">Users</a> - get it in JSON (AJAX request)</li>
 </ul>
 
