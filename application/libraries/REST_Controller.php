@@ -262,6 +262,7 @@ class REST_Controller extends CI_Controller {
         header('Access-Control-Allow-Methods: POST, GET, PUT, DELETE');
         header('Access-Control-Allow-Headers: NCZ');
         header('Access-Control-Max-Age: 1728000');
+        header('Connection: close');
         exit($output);
     }
 
