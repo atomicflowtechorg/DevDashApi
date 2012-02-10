@@ -58,34 +58,35 @@ class Api extends REST_Controller {
             $this->response(array('error' => 'Task could not be found'), 404);
         }
     }
-
-    function task_post() {
+    
+    //task update
+    function task_put() {
         $this->load->model('TaskModel');
 
         $this->load->library('Task');
         $task = new Task();
 
-        $task->id = $this->post('id');
-        $task->name = $this->post('name');
+        $task->id = $this->put('id');
+        $task->name = $this->put('name');
         
         
-        if($this->post('status') !== false){
-            $task->status = $this->post('status');
+        if($this->put('status') !== false){
+            $task->status = $this->put('status');
         }
         
-        if($this->post('assignedTo') !== false){
-            $task->assignedTo = $this->post('assignedTo');
+        if($this->put('assignedTo') !== false){
+            $task->assignedTo = $this->put('assignedTo');
         }
         
-        if($this->post('notes') !== false){
-            $task->notes = $this->post('notes');
+        if($this->put('notes') !== false){
+            $task->notes = $this->put('notes');
         }
         
-        if($this->post('dateDue') !== false){
-            $task->dateDue = $this->post('dateDue');
+        if($this->put('dateDue') !== false){
+            $task->dateDue = $this->put('dateDue');
         }
         
-        if (!$this->post('id')) {
+        if (!$this->put('id')) {
             $this->response(array('error' => 'id is required for an update'), 400);
         }
 
@@ -99,28 +100,29 @@ class Api extends REST_Controller {
             $this->response(array('error' => 'Task could not be found'), 404);
         }
     }
-
-    function task_put() {
+    
+    //task create
+    function task_post() {
         $this->load->model('TaskModel');
         $this->load->library('Task');
         $task = new Task();
-        if (!$this->put('name')){
+        if (!$this->post('name')){
             $this->response(array('error'=> 'Task Requires a name'), 406);
         } else {
-            $task->name = $this->put('name');
+            $task->name = $this->post('name');
         }
-        if($this->put('assignedTo') !== false){
-            $task->assignedTo = $this->put('assignedTo');
+        if($this->post('assignedTo') !== false){
+            $task->assignedTo = $this->post('assignedTo');
         }
-        if($this->put('notes') !== false){
-            $task->notes = $this->put('notes');
-        }
-        
-        if($this->put('dateDue') !== false){
-            $task->dateDue = $this->put('dateDue');
+        if($this->post('notes') !== false){
+            $task->notes = $this->post('notes');
         }
         
-        $taskResponse = $this->TaskModel->task_put($task);
+        if($this->post('dateDue') !== false){
+            $task->dateDue = $this->post('dateDue');
+        }
+        
+        $taskResponse = $this->TaskModel->task_create($task);
         $this->response($taskResponse, 200);
     }
 

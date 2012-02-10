@@ -45,7 +45,7 @@ class TaskModel extends CI_Model {
         return $task;
     }
 
-    function task_put($task) {
+    function task_create($task) {
         $tblTask = array('fldName' => $task->name, 'fldStatus' => $task->status, 'fldNotes' => $task->notes, 'fldDateDue' => $task->dateDue);
 
 
